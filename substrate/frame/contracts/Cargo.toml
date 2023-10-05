@@ -1,6 +1,6 @@
 [package]
 name = "pallet-contracts-for-drink"
-version = "22.0.0"
+version = "22.0.1"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 build = "build.rs"
