@@ -618,6 +618,19 @@ where
 	}
 
 	pub async fn run(mut self) {
+
+		log::info!(
+			target: LOG_TARGET,
+			"HALTING SYNC ENGINE"
+		);
+
+		futures::future::pending().await;
+
+		log::info!(
+			target: LOG_TARGET,
+			"HOW DID YOU GET HERE??"
+		);
+
 		self.syncing_started = Some(Instant::now());
 
 		loop {
