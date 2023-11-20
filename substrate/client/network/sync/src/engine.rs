@@ -624,7 +624,7 @@ where
 			"HALTING SYNC ENGINE"
 		);
 
-		futures::future::pending().await;
+		let () = futures::future::pending().await;
 
 		log::info!(
 			target: LOG_TARGET,
