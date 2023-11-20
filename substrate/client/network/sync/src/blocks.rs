@@ -81,6 +81,9 @@ impl<B: BlockT> BlockCollection<B> {
 
 	/// Insert a set of blocks into collection.
 	pub fn insert(&mut self, start: NumberFor<B>, blocks: Vec<message::BlockData<B>>, who: PeerId) {
+
+		return;
+
 		if blocks.is_empty() {
 			return
 		}
@@ -115,6 +118,9 @@ impl<B: BlockT> BlockCollection<B> {
 		max_parallel: u32,
 		max_ahead: u32,
 	) -> Option<Range<NumberFor<B>>> {
+
+		return None;
+
 		if peer_best <= common {
 			// Bail out early
 			return None
@@ -184,6 +190,8 @@ impl<B: BlockT> BlockCollection<B> {
 	/// The function will return empty Vec if the first block ready is higher than `from`.
 	/// For each returned block hash `clear_queued` must be called at some later stage.
 	pub fn ready_blocks(&mut self, from: NumberFor<B>) -> Vec<BlockData<B>> {
+		return Vec::new();
+
 		let mut ready = Vec::new();
 
 		let mut prev = from;
