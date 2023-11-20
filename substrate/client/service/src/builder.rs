@@ -725,6 +725,9 @@ where
 	TExPool: TransactionPool<Block = TBl, Hash = <TBl as BlockT>::Hash> + 'static,
 	TImpQu: ImportQueue<TBl> + 'static,
 {
+
+	info!("RUNNING NETWORK WITHOUT THE SYNC PROTOCOL");
+
 	let BuildNetworkParams {
 		config,
 		mut net_config,
@@ -820,19 +823,19 @@ where
 	};
 
 	// install request handlers to `FullNetworkConfiguration`
-	net_config.add_request_response_protocol(block_request_protocol_config);
-	net_config.add_request_response_protocol(state_request_protocol_config);
-	net_config.add_request_response_protocol(light_client_request_protocol_config);
+	// net_config.add_request_response_protocol(block_request_protocol_config);
+	// net_config.add_request_response_protocol(state_request_protocol_config);
+	// net_config.add_request_response_protocol(light_client_request_protocol_config);
 
-	if let Some(config) = warp_sync_protocol_config {
-		net_config.add_request_response_protocol(config);
-	}
+	// if let Some(config) = warp_sync_protocol_config {
+	// 	net_config.add_request_response_protocol(config);
+	// }
 
-	if config.network.ipfs_server {
-		let (handler, protocol_config) = BitswapRequestHandler::new(client.clone());
-		spawn_handle.spawn("bitswap-request-handler", Some("networking"), handler.run());
-		net_config.add_request_response_protocol(protocol_config);
-	}
+	// if config.network.ipfs_server {
+	// 	let (handler, protocol_config) = BitswapRequestHandler::new(client.clone());
+	// 	spawn_handle.spawn("bitswap-request-handler", Some("networking"), handler.run());
+	// 	net_config.add_request_response_protocol(protocol_config);
+	// }
 
 	// create transactions protocol and add it to the list of supported protocols of
 	// `network_params`
