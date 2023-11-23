@@ -263,7 +263,18 @@ impl<T: Config> WasmBlob<T> {
 						&self.code_info.owner,
 						deposit,
 					)
-					.map_err(|_| <Error<T>>::StorageDepositNotEnoughFunds)?;
+					.map_err(|msg|
+								 {
+									 log::error!(
+										target: LOG_TARGET,
+										"Failed to hold {:?} from the code owner's account 0x{:?} for code {:?}, reason: {:?}.",
+										deposit,
+										HexDisplay::from(&code_info.owner.encode()),
+										code_hash,
+										err
+									 );
+									 <Error<T>>::StorageDepositNotEnoughFunds
+								 })?;
 
 					self.code_info.refcount = 0;
 					<PristineCode<T>>::insert(code_hash, &self.code);
