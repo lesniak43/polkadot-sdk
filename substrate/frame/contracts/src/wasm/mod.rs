@@ -47,6 +47,7 @@ use frame_support::{
 	traits::{fungible::MutateHold, tokens::Precision::BestEffort},
 };
 use sp_core::Get;
+use use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::{DispatchError, RuntimeDebug};
 use sp_std::prelude::*;
 use wasmi::{InstancePre, Linker, Memory, MemoryType, StackLimits, Store};
@@ -269,9 +270,9 @@ impl<T: Config> WasmBlob<T> {
 										target: LOG_TARGET,
 										"Failed to hold {:?} from the code owner's account 0x{:?} for code {:?}, reason: {:?}.",
 										deposit,
-										HexDisplay::from(&code_info.owner.encode()),
+										HexDisplay::from(&self.code_info.owner.encode()),
 										code_hash,
-										err
+										msg
 									 );
 									 <Error<T>>::StorageDepositNotEnoughFunds
 								 })?;
