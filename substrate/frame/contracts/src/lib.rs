@@ -417,8 +417,9 @@ pub mod pallet {
 			use migration::MigrateResult::*;
 
 			loop {
-				let (result, weight) = Migration::<T>::migrate(remaining_weight);
-				remaining_weight.saturating_reduce(weight);
+				const reduced_weight_factor: u64 = 4;
+				let (result, weight) = Migration::<T>::migrate(remaining_weight.saturating_div(reduced_weight_factor));
+				remaining_weight.saturating_reduce(weight.saturating_mul(reduced_weight_factor));
 
 				match result {
 					// There is not enough weight to perform a migration, or make any progress, we
