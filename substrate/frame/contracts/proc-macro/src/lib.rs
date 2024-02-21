@@ -806,13 +806,12 @@ fn expand_functions(def: &EnvDef, target: Target) -> TokenStream2 {
 							};
 
 							// sync gas from engine to host
-							let __gas_before__ = {
-								let engine_consumed_total =
+							let __gas_left_before__ = {
+								let executor_total =
 									__caller__.fuel_consumed().expect("Fuel metering is enabled; qed");
 								__caller__.data_mut().ext().gas_meter_mut()
-									.charge_fuel(engine_consumed_total)
+									.sync_from_executor(executor_total)
 									.map_err(|err| set_trap_reason(__caller__.data_mut(), err))?
-									.ref_time()
 							};
 
 							// ctx and memory is for access by the body
@@ -833,18 +832,10 @@ fn expand_functions(def: &EnvDef, target: Target) -> TokenStream2 {
 								.map_err(|err| set_trap_reason(ctx, err));
 
 							// sync gas from host to engine
-							let mut gas_after = ctx.ext().gas_meter().gas_left().ref_time();
-							let mut host_consumed = __gas_before__.saturating_sub(gas_after);
 							let instruction_weight = ctx.ext().schedule().instruction_weights.base;
-							// Possible undercharge of at max 1 fuel here, if host consumed less
-							// than `instruction_weights.base` Not a problem though, as soon as host
-							// accounts its spent gas properly.
-							let fuel_consumed = host_consumed
-								.checked_div(u64::from(instruction_weight))
-								.ok_or(Error::<E::T>::InvalidSchedule)
-								.map_err(|err| set_trap_reason(ctx, err))?;
+                            let fuel_consumed = __caller__.data_mut().ext().gas_meter_mut().sync_to_executor(__gas_left_before__).unwrap();
 							__caller__
-								.consume_fuel(fuel_consumed)
+								.consume_fuel(fuel_consumed.into())
 								.map_err(|_| set_trap_reason(__caller__.data_mut(), TrapReason::from(Error::<E::T>::OutOfGas)))?;
 
 							result
