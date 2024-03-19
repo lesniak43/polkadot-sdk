@@ -365,7 +365,14 @@ impl<T: Config> WasmBlob<T> {
 		// Any abort in start function (includes `return` + `terminate`) will make us skip the
 		// call into the subsequent exported function. This means that calling `return` returns data
 		// from the whole contract execution.
-		match instance.start(&mut store) {
+
+		let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+
+		println!("∧[wasm][instance.start][beg] {:?}", now());
+		let instance_start = instance.start(&mut store);
+		println!("∧[wasm][instance.start][end] {:?}", now());
+
+		match instance_start {
 			Ok(instance) => {
 				let exported_func = instance
 					.get_export(&store, function.identifier())
@@ -375,7 +382,9 @@ impl<T: Config> WasmBlob<T> {
 						Error::<T>::CodeRejected
 					})?;
 
+				println!("∧[wasm][exported_func.call][beg] {:?}", now());
 				let result = exported_func.call(&mut store, &[], &mut []);
+				println!("∧[wasm][exported_func.call][end] {:?}", now());
 				process_result(store, result)
 			},
 			Err(err) => process_result(store, Err(err)),
@@ -401,8 +410,12 @@ impl<T: Config> WasmBlob<T> {
 		};
 		state.user.set_memory(MemoryRef::Virt(virt.memory()));
 
+		let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+
+		println!("∧[riscv][virt.execute][beg] {:?}", now());
 		let outcome =
 			virt.execute(function.identifier(), runtime::riscv_syscall_handler::<E>, &mut state);
+		println!("∧[riscv][virt.execute][end] {:?}", now());
 
 		log::debug!(target: LOG_TARGET, "riscv outcome {:?}", outcome);
 

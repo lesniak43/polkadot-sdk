@@ -1452,7 +1452,10 @@ impl<T: Config> Pallet<T> {
 			storage_deposit_limit,
 			debug_message: debug_message.as_mut(),
 		};
+		let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+		println!("∧[run_guarded][beg] {:?}", now());
 		let output = CallInput::<T> { dest, determinism }.run_guarded(common);
+		println!("∧[run_guarded][end] {:?}", now());
 		let events = if matches!(collect_events, CollectEvents::UnsafeCollect) {
 			Some(System::<T>::read_events_no_consensus().map(|e| *e).collect())
 		} else {
@@ -1549,7 +1552,10 @@ impl<T: Config> Pallet<T> {
 			debug_message: debug_message.as_mut(),
 		};
 
+		let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+		println!("∧[run_guarded][beg] {:?}", now());
 		let output = InstantiateInput::<T> { code, salt }.run_guarded(common);
+		println!("∧[run_guarded][end] {:?}", now());
 		ContractInstantiateResult {
 			result: output
 				.result
