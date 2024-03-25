@@ -635,7 +635,7 @@ pub mod pallet {
 			storage_deposit_limit: Option<<BalanceOf<T> as codec::HasCompact>::Type>,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+			let now = ||web_time::SystemTime::now();
 			log::error!("[call][start] {:?}", now());
 
 			Migration::<T>::ensure_migrated()?;
