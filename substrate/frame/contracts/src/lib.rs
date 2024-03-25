@@ -635,8 +635,10 @@ pub mod pallet {
 			storage_deposit_limit: Option<<BalanceOf<T> as codec::HasCompact>::Type>,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			use aleph_runtime_interfaces::now::now;
+
 			// let now = ||web_time::SystemTime::now();
-			// log::error!("[call][start] {:?}", now());
+			log::error!("[call][start] {:?}", now());
 
 			Migration::<T>::ensure_migrated()?;
 			let common = CommonInput {
@@ -655,7 +657,7 @@ pub mod pallet {
 					output.result = Err(<Error<T>>::ContractReverted.into());
 				}
 			}
-			// log::error!("[call][end]   {:?}", now());
+			log::error!("[call][end]   {:?}", now());
 
 			output.gas_meter.into_dispatch_result(output.result, T::WeightInfo::call())
 		}
