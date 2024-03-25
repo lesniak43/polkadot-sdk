@@ -635,6 +635,9 @@ pub mod pallet {
 			storage_deposit_limit: Option<<BalanceOf<T> as codec::HasCompact>::Type>,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
+			let now = ||chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap();
+			log::error!("[call][start] {:?}", now());
+
 			Migration::<T>::ensure_migrated()?;
 			let common = CommonInput {
 				origin: Origin::from_runtime_origin(origin)?,
@@ -652,6 +655,8 @@ pub mod pallet {
 					output.result = Err(<Error<T>>::ContractReverted.into());
 				}
 			}
+			log::error!("[call][end]   {:?}", now());
+
 			output.gas_meter.into_dispatch_result(output.result, T::WeightInfo::call())
 		}
 
