@@ -1342,7 +1342,13 @@ trait Invokable<T: Config>: Sized {
 					}),
 				},
 				// Enter contract call.
-				|_| self.run(common, GasMeter::new(gas_limit)),
+				|_| {
+					use aleph_runtime_interfaces::now::now;
+					log::error!("[call][start] {:?}", now());
+					let res = self.run(common, GasMeter::new(gas_limit));
+					log::error!("[call][end]   {:?}", now());
+					res
+				},
 			)
 		})
 	}
