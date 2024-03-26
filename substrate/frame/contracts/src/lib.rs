@@ -635,9 +635,7 @@ pub mod pallet {
 			storage_deposit_limit: Option<<BalanceOf<T> as codec::HasCompact>::Type>,
 			data: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			use aleph_runtime_interfaces::now::now;
-
-			// let now = ||web_time::SystemTime::now();
+			use aleph_dev_runtime_interfaces::now::now;
 			log::error!("[call][start] {:?}", now());
 
 			Migration::<T>::ensure_migrated()?;
