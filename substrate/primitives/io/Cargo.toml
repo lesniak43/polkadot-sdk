@@ -18,6 +18,8 @@ workspace = true
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
+chrono = { version = "0.4.35", default-features = false, features = ["now"] }
+
 bytes = { version = "1.1.0", default-features = false }
 codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["bytes"] }
 sp-core = { path = "../core", default-features = false }
