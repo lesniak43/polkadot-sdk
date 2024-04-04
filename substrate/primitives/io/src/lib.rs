@@ -1802,6 +1802,15 @@ pub fn oom(_: core::alloc::Layout) -> ! {
 #[cfg(feature = "std")]
 pub type TestExternalities = sp_state_machine::TestExternalities<sp_core::Blake2Hasher>;
 
+/// Copied from `aleph_dev_runtime_interfaces`.
+#[sp_runtime_interface::runtime_interface]
+pub trait Now {
+	/// Get current UTC time in nanoseconds.
+	fn now() -> Result<i64, ()> {
+		Ok(chrono::prelude::Utc::now().timestamp_nanos_opt().unwrap())
+	}
+}
+
 /// The host functions Substrate provides for the Wasm runtime environment.
 ///
 /// All these host functions will be callable from inside the Wasm environment.
@@ -1820,6 +1829,7 @@ pub type SubstrateHostFunctions = (
 	crate::trie::HostFunctions,
 	offchain_index::HostFunctions,
 	transaction_index::HostFunctions,
+	now::HostFunctions,
 );
 
 #[cfg(test)]

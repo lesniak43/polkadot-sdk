@@ -45,7 +45,6 @@ use std::{path::Path, sync::Arc};
 pub type HostFunctions = (
 	sp_io::SubstrateHostFunctions,
 	sp_statement_store::runtime_api::HostFunctions,
-	aleph_dev_runtime_interfaces::now::HostFunctions,
 );
 
 /// Host functions required for kitchensink runtime and Substrate node.

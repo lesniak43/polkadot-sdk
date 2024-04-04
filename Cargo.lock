@@ -18821,6 +18821,7 @@ name = "sp-io"
 version = "30.0.0"
 dependencies = [
  "bytes",
+ "chrono",
  "ed25519-dalek",
  "libsecp256k1",
  "log",
@@ -19524,7 +19525,6 @@ dependencies = [
 name = "staging-node-cli"
 version = "3.0.0-dev"
 dependencies = [
- "aleph-dev-runtime-interfaces",
  "array-bytes 6.2.2",
  "assert_cmd",
  "clap 4.5.4",

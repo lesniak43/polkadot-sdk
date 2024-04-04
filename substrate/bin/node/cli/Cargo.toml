@@ -118,8 +118,6 @@ node-inspect = { package = "staging-node-inspect", path = "../inspect", optional
 try-runtime-cli = { path = "../../../utils/frame/try-runtime/cli", optional = true }
 serde_json = { workspace = true, default-features = true }
 
-aleph-dev-runtime-interfaces = { git = "https://github.com/Cardinal-Cryptography/dev-runtime-interfaces", branch = "hans-old-timings", default-features = false, features = ["std","now"] }
-
 [dev-dependencies]
 sc-keystore = { path = "../../../client/keystore" }
 sc-client-db = { path = "../../../client/db" }
