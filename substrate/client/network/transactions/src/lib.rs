@@ -169,7 +169,9 @@ impl TransactionsHandlerPrototype {
 		transaction_pool: Arc<dyn TransactionPool<H, B>>,
 		metrics_registry: Option<&Registry>,
 	) -> error::Result<(TransactionsHandler<B, H, N, S>, TransactionsHandlerController<H>)> {
+		log::info!(target: "lesniak", "creating sync_event_stream");
 		let sync_event_stream = sync.event_stream("transactions-handler-sync");
+		log::info!(target: "lesniak", "sync_event_stream created");
 		let (to_handler, from_controller) = tracing_unbounded("mpsc_transactions_handler", 100_000);
 
 		let handler = TransactionsHandler {
@@ -284,6 +286,7 @@ where
 					self.propagate_transactions();
 				},
 				(tx_hash, result) = self.pending_transactions.select_next_some() => {
+					log::info!(target: "lesniak", "self.pending_transactions.select_next_some()");
 					if let Some(peers) = self.pending_transactions_peers.remove(&tx_hash) {
 						peers.into_iter().for_each(|p| self.on_handle_transaction_import(p, result));
 					} else {
@@ -291,23 +294,28 @@ where
 					}
 				},
 				sync_event = self.sync_event_stream.next() => {
+					log::info!(target: "lesniak", "self.sync_event_stream.next()");
 					if let Some(sync_event) = sync_event {
 						self.handle_sync_event(sync_event);
 					} else {
+						log::info!(target: "lesniak", "self.sync_event_stream.next() - stream closed, returning");
 						// Syncing has seemingly closed. Closing as well.
 						return;
 					}
 				}
 				message = self.from_controller.select_next_some() => {
+					log::info!(target: "lesniak", "self.from_controller.select_next_some()");
 					match message {
 						ToHandler::PropagateTransaction(hash) => self.propagate_transaction(&hash),
 						ToHandler::PropagateTransactions => self.propagate_transactions(),
 					}
 				},
 				event = self.notification_service.next_event().fuse() => {
+					log::info!(target: "lesniak", "self.notification_service.next_event().fuse()");
 					if let Some(event) = event {
 						self.handle_notification_event(event)
 					} else {
+						log::info!(target: "lesniak", "self.notification_service.next_event().fuse() - stream closed, returning");
 						// `Notifications` has seemingly closed. Closing as well.
 						return
 					}
@@ -320,7 +328,7 @@ where
 		match event {
 			NotificationEvent::ValidateInboundSubstream { peer, handshake, result_tx, .. } => {
 				// only accept peers whose role can be determined
-				log::info!(target: "sync", "NotificationEvent::ValidateInboundStream {:?} {:?}", peer, handshake);
+				log::info!(target: "lesniak", "NotificationEvent::ValidateInboundStream {:?} {:?}", peer, handshake);
 				let result = self
 					.network
 					.peer_role(peer, handshake)
@@ -328,7 +336,7 @@ where
 				let _ = result_tx.send(result);
 			},
 			NotificationEvent::NotificationStreamOpened { peer, handshake, .. } => {
-				log::info!(target: "sync", "NotificationEvent::NotificationStreamOpened {:?} {:?}", peer, handshake);
+				log::info!(target: "lesniak", "NotificationEvent::NotificationStreamOpened {:?} {:?}", peer, handshake);
 				let Some(role) = self.network.peer_role(peer, handshake) else {
 					log::debug!(target: "sub-libp2p", "role for {peer} couldn't be determined");
 					return
@@ -346,12 +354,12 @@ where
 				debug_assert!(_was_in.is_none());
 			},
 			NotificationEvent::NotificationStreamClosed { peer } => {
-				log::info!(target: "sync", "NotificationEvent::NotificationStreamClosed {:?}", peer);
+				log::info!(target: "lesniak", "NotificationEvent::NotificationStreamClosed {:?}", peer);
 				let _peer = self.peers.remove(&peer);
 				debug_assert!(_peer.is_some());
 			},
 			NotificationEvent::NotificationReceived { peer, notification } => {
-				log::info!(target: "sync", "NotificationEvent::NotificationReceived {:?} {:?}", peer, notification);
+				log::info!(target: "lesniak", "NotificationEvent::NotificationReceived {:?} {:?}", peer, notification);
 				if let Ok(m) =
 					<Transactions<B::Extrinsic> as Decode>::decode(&mut notification.as_ref())
 				{
@@ -366,7 +374,7 @@ where
 	fn handle_sync_event(&mut self, event: SyncEvent) {
 		match event {
 			SyncEvent::PeerConnected(remote) => {
-				log::info!(target: "sync", "SyncEvent::PeerConnected {:?}", remote);
+				log::info!(target: "lesniak", "SyncEvent::PeerConnected {:?}", remote);
 				let addr = iter::once(multiaddr::Protocol::P2p(remote.into()))
 					.collect::<multiaddr::Multiaddr>();
 				let result = self.network.add_peers_to_reserved_set(
@@ -376,10 +384,10 @@ where
 				if let Err(err) = result {
 					log::error!(target: "sync", "Add reserved peer failed: {}", err);
 				}
-				log::info!(target: "sync", "SyncEvent::PeerConnected succeeded");
+				log::info!(target: "lesniak", "SyncEvent::PeerConnected succeeded");
 			},
 			SyncEvent::PeerDisconnected(remote) => {
-				log::info!(target: "sync", "SyncEvent::PeerDisconnected {:?}", remote);
+				log::info!(target: "lesniak", "SyncEvent::PeerDisconnected {:?}", remote);
 				let result = self.network.remove_peers_from_reserved_set(
 					self.protocol_name.clone(),
 					iter::once(remote).collect(),
@@ -387,7 +395,7 @@ where
 				if let Err(err) = result {
 					log::error!(target: "sync", "Remove reserved peer failed: {}", err);
 				}
-				log::info!(target: "sync", "SyncEvent::PeerDisconnected succeeded");
+				log::info!(target: "lesniak", "SyncEvent::PeerDisconnected succeeded");
 			},
 		}
 	}
