@@ -320,6 +320,7 @@ where
 		match event {
 			NotificationEvent::ValidateInboundSubstream { peer, handshake, result_tx, .. } => {
 				// only accept peers whose role can be determined
+				log::info!(target: "sync", "NotificationEvent::ValidateInboundStream {:?} {:?}", peer, handshake);
 				let result = self
 					.network
 					.peer_role(peer, handshake)
@@ -327,6 +328,7 @@ where
 				let _ = result_tx.send(result);
 			},
 			NotificationEvent::NotificationStreamOpened { peer, handshake, .. } => {
+				log::info!(target: "sync", "NotificationEvent::NotificationStreamOpened {:?} {:?}", peer, handshake);
 				let Some(role) = self.network.peer_role(peer, handshake) else {
 					log::debug!(target: "sub-libp2p", "role for {peer} couldn't be determined");
 					return
@@ -344,10 +346,12 @@ where
 				debug_assert!(_was_in.is_none());
 			},
 			NotificationEvent::NotificationStreamClosed { peer } => {
+				log::info!(target: "sync", "NotificationEvent::NotificationStreamClosed {:?}", peer);
 				let _peer = self.peers.remove(&peer);
 				debug_assert!(_peer.is_some());
 			},
 			NotificationEvent::NotificationReceived { peer, notification } => {
+				log::info!(target: "sync", "NotificationEvent::NotificationReceived {:?} {:?}", peer, notification);
 				if let Ok(m) =
 					<Transactions<B::Extrinsic> as Decode>::decode(&mut notification.as_ref())
 				{
@@ -362,6 +366,7 @@ where
 	fn handle_sync_event(&mut self, event: SyncEvent) {
 		match event {
 			SyncEvent::PeerConnected(remote) => {
+				log::info!(target: "sync", "SyncEvent::PeerConnected {:?}", remote);
 				let addr = iter::once(multiaddr::Protocol::P2p(remote.into()))
 					.collect::<multiaddr::Multiaddr>();
 				let result = self.network.add_peers_to_reserved_set(
@@ -371,8 +376,10 @@ where
 				if let Err(err) = result {
 					log::error!(target: "sync", "Add reserved peer failed: {}", err);
 				}
+				log::info!(target: "sync", "SyncEvent::PeerConnected succeeded");
 			},
 			SyncEvent::PeerDisconnected(remote) => {
+				log::info!(target: "sync", "SyncEvent::PeerDisconnected {:?}", remote);
 				let result = self.network.remove_peers_from_reserved_set(
 					self.protocol_name.clone(),
 					iter::once(remote).collect(),
@@ -380,6 +387,7 @@ where
 				if let Err(err) = result {
 					log::error!(target: "sync", "Remove reserved peer failed: {}", err);
 				}
+				log::info!(target: "sync", "SyncEvent::PeerDisconnected succeeded");
 			},
 		}
 	}
