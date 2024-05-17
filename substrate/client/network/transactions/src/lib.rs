@@ -141,12 +141,7 @@ impl TransactionsHandlerPrototype {
 			vec![format!("/{}/transactions/1", protocol_id.as_ref()).into()],
 			MAX_TRANSACTIONS_SIZE,
 			None,
-			SetConfig {
-				in_peers: 0,
-				out_peers: 0,
-				reserved_nodes: Vec::new(),
-				non_reserved_mode: NonReservedPeerMode::Deny,
-			},
+			SetConfig::default(),
 		);
 
 		(Self { protocol_name, notification_service }, config)
