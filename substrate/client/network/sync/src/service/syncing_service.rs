@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+use log::{debug, trace, warn, info};
+
 use crate::types::{ExtendedPeerInfo, SyncEvent, SyncEventStream, SyncStatus, SyncStatusProvider};
 
 use futures::{channel::oneshot, Stream};
@@ -231,7 +233,10 @@ impl<B: BlockT> SyncEventStream for SyncingService<B> {
 	/// Get syncing event stream.
 	fn event_stream(&self, name: &'static str) -> Pin<Box<dyn Stream<Item = SyncEvent> + Send>> {
 		let (tx, rx) = tracing_unbounded(name, 100_000);
-		let _ = self.tx.unbounded_send(ToServiceCommand::EventStream(tx));
+		match self.tx.unbounded_send(ToServiceCommand::EventStream(tx)){
+			Ok(_) => info!(target: "lesniak", "event_stream - successfully sent tx"),
+			Err(e) => info!(target: "lesniak", "event_stream - failed to send tx: {:?}", e),
+		};
 		Box::pin(rx)
 	}
 }
